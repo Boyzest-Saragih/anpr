@@ -42,9 +42,9 @@ def crop_plate(img_input):
 
         x, y, w, h = cv2.boundingRect(approx)
 
-        # 5. Filter Rasio Aspek Plat (Kunci Utama)
-        # Plat nomor Indonesia (motor) biasanya sekitar 25cm x 10cm, rasio ~2.5:1
-        # Kita beri toleransi, misalnya 2.0:1 hingga 4.0:1
+        # 5. Filter Rasio Aspek Plat
+        # Plat nomor Indonesia biasanya sekitar 25cm x 10cm, rasio ~2.5:1
+        #toleransi, misalnya 2.0:1 hingga 4.0:1
         aspect_ratio = float(w) / h
 
         # Jika kontur memiliki 4-8 sudut (toleransi untuk plat miring/terpotong)
