@@ -5,9 +5,9 @@ import utils
 
 st.set_page_config(layout="wide")
 
-st.title("🚗 ANPR Preprocessing Pipeline")
+st.title("Visualisasi Pipeline ANPR processing image")
 
-uploaded_file = st.file_uploader("📤 Upload Image", type=["jpg", "png", "jpeg"])
+uploaded_file = st.file_uploader("Upload Image", type=["jpg", "png", "jpeg"])
 
 if uploaded_file is not None:
     file_bytes = np.frombuffer(uploaded_file.read(), np.uint8)
@@ -15,85 +15,85 @@ if uploaded_file is not None:
 
     if img is not None:
 
-        st.subheader("📌 Original Image")
-        st.image(img, channels="BGR", use_column_width=True)
+        st.markdown("### Input")
+        st.image(img, channels="BGR", width=300)
 
-        if st.button("🚀 Process Image"):
+        if st.button("Run Pipeline"):
 
             with st.spinner("Processing..."):
 
                 # ======================
-                # STEP 1 - PREPROCESSING
+                # STEP 1
                 # ======================
-                st.subheader("🧪 Step 1: Preprocessing")
+                gray = utils.gray_scale(img)
+                blur = utils.blur_bilateral(gray)
 
-                col1, col2 = st.columns(2)
+                # ======================
+                # STEP 2
+                # ======================
+                detected, plate = utils.localize_plate(blur)
 
-                gray_img = utils.gray_scale(img)
-                blur_img = utils.blur_bilateral(gray_img)
+                # ======================
+                # STEP 3
+                # ======================
+                thresh = utils.thresholding(plate)
+                morph = utils.morphological_operations(thresh)
+
+                # ======================
+                # STEP 4
+                # ======================
+                contours = utils.find_contours(morph)
+                chars = utils.find_characters(contours, morph)
+                detected_chars = utils.detected_characters(chars, morph)
+
+                # ======================
+                # STEP 5
+                # ======================
+                extracted = utils.extract_characters_with_pd(chars, morph)
+                resized = utils.resize_characters(extracted)
+                final_chars = utils.visualize_characters(resized)
+
+                # ======================
+                # PIPELINE DISPLAY
+                # ======================
+                st.markdown("---")
+                st.markdown("### Pipeline")
+
+                col1, col2, col3, col4, col5 = st.columns(5)
 
                 with col1:
-                    st.image(gray_img, caption="Grayscale", use_column_width=True)
+                    st.caption("Grayscale")
+                    st.image(gray, width=250)
+
+                    st.caption("Blur")
+                    st.image(blur, width=250)
 
                 with col2:
-                    st.image(blur_img, caption="Bilateral Blur", use_column_width=True)
+                    st.caption("Detected Area")
+                    st.image(detected, width=250)
 
-                # ======================
-                # STEP 2 - PLATE DETECTION
-                # ======================
-                st.subheader("🚘 Step 2: Plate Localization")
-
-                img_detected, plate = utils.localize_plate(blur_img)
-
-                col3, col4 = st.columns(2)
+                    st.caption("Plate")
+                    st.image(plate, width=250)
 
                 with col3:
-                    st.image(img_detected, caption="Detected Plate Area", use_column_width=True)
+                    st.caption("Threshold")
+                    st.image(thresh, width=250)
+
+                    st.caption("Morphology")
+                    st.image(morph, width=250)
 
                 with col4:
-                    st.image(plate, caption="Cropped Plate", use_column_width=True)
-
-                # ======================
-                # STEP 3 - THRESHOLD + MORPH
-                # ======================
-                st.subheader("⚙️ Step 3: Enhancement")
-
-                plate_thresh = utils.thresholding(plate)
-                plate_morph = utils.morphological_operations(plate_thresh)
-
-                col5, col6 = st.columns(2)
+                    st.caption("Contours")
+                    st.image(detected_chars, width=250)
 
                 with col5:
-                    st.image(plate_thresh, caption="Thresholding", use_column_width=True)
+                    st.caption("Characters")
 
-                with col6:
-                    st.image(plate_morph, caption="Morphology", use_column_width=True)
-
-                # ======================
-                # STEP 4 - CHARACTER DETECTION
-                # ======================
-                st.subheader("🔍 Step 4: Character Detection")
-
-                contours = utils.find_contours(plate_morph)
-                char_candidates = utils.find_characters(contours, plate_morph)
-                char_detected = utils.detected_characters(char_candidates, plate_morph)
-
-                st.image(char_detected, caption="Detected Characters", use_column_width=True)
-
-                # ======================
-                # STEP 5 - CHARACTER EXTRACTION
-                # ======================
-                st.subheader("🔡 Step 5: Character Extraction")
-
-                extracted_char = utils.extract_characters_with_pd(char_candidates, plate_morph)
-                char_resize = utils.resize_characters(extracted_char)
-                char_final = utils.visualize_characters(char_resize)
-
-                cols = st.columns(len(char_final))
-
-                for i, char in enumerate(char_final):
-                    with cols[i]:
-                        st.image(char, caption=f"Char {i}", clamp=True)
+                    if not final_chars:
+                        st.warning("No char")
+                    else:
+                        for c in final_chars:
+                            st.image(c, width=50, clamp=True)
 
     else:
-        st.error("Gagal membaca gambar. Coba format lain.")
+        st.error("Gagal membaca gambar.")
