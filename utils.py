@@ -7,8 +7,8 @@ import numpy as np
 def gray_scale(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-def blur_bilateral(image_gray, kernel_size=5):
-    return cv2.bilateralFilter(img_gray, 9, 75, 75)
+def blur_bilateral(image_gray):
+    return cv2.bilateralFilter(image_gray, 9, 75, 75)
 
 def automatic_canny_thresholds(image):
     median = np.median(image)
@@ -63,7 +63,7 @@ def localize_plate(blur_bilateral):
     plate_img, all_candidates = crop_plate(blur_bilateral)
 
 
-    img_detected = cv2.cvtColor(img_gray, cv2.COLOR_BGR2RGB).copy()
+    img_detected = cv2.cvtColor(blur_bilateral, cv2.COLOR_BGR2RGB).copy()
     if all_candidates:
         for (x, y, w, h), _ in all_candidates:
             cv2.rectangle(img_detected, (x, y), (x+w, y+h), (0, 255, 0), 3)
@@ -101,10 +101,10 @@ def find_contours(morph_result):
     contours, _ = cv2.findContours(morph_result, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     return contours
 
-def find_characters(contours, plate_img):
+def find_characters(contours, plate_morph):
     char_candidates = []
 
-    plate_h, plate_w = final_result.shape
+    plate_h, plate_w = plate_morph.shape
 
     for cnt in contours:
         x, y, w, h = cv2.boundingRect(cnt)
@@ -130,16 +130,16 @@ def detected_characters(char_candidates, final_result):
         cv2.rectangle(img_with_boxes, (x, y), (x+w, y+h), (255, 0, 0), 2)
     return img_with_boxes
 
-def extract_characters(char_candidates, plate_img):
+def extract_characters(char_candidates, final_result):
     characters = []
 
-    for (x, y, w, h) in char_candidates:
+    for (x, y, w, h,*_) in char_candidates:
         char = final_result[y:y+h, x:x+w]
         characters.append(char)
 
     return characters
 
-def extract_characters_with_pd(char_candidates, plate_img):
+def extract_characters_with_pd(char_candidates, final_result):
     characters = []
 
     for (x, y, w, h) in char_candidates:
@@ -153,9 +153,9 @@ def extract_characters_with_pd(char_candidates, plate_img):
         char = final_result[y1:y2, x1:x2]
 
         characters.append(char)
-        return characters
+    return characters
 
-def resize_characters(char_candidates, plate_img):
+def resize_characters(characters):
     resized_characters = []
     for char in characters:
         resized = cv2.resize(char, (28, 28), interpolation=cv2.INTER_AREA)
