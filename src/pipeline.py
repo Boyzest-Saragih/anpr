@@ -5,14 +5,12 @@ from .ocr import cnn_ocr
 
 def recognize_plate(image):
     # 1. Deteksi plat
-    # PERBAIKAN: Tangkap dua nilai yang di-return (plate dan bounding box)
     plate, box = yolo_plate.crop_plate_yolo(image)
 
     if plate is None:
         raise ValueError("Plat kendaraan tidak ditemukan.")
 
     # 2. Deteksi karakter
-    # Variabel 'plate' sekarang sudah murni berisi image array
     character_images = yolo_char_plate.extract_characters(plate)
 
     if len(character_images) == 0:
@@ -25,14 +23,11 @@ def recognize_plate(image):
         resized = resize.resize_with_padding(char)
         processed_characters.append(resized)
 
-    # 4. OCR
-    # PERBAIKAN: Tangkap dua nilai yang di-return (nomor plat dan confidence)
     plate_number, confidence = cnn_ocr.predict_plate_number(processed_characters)
 
-    # 5. Return hasil
     return {
         "plate_image": plate,
         "characters": processed_characters,
         "plate_number": plate_number,
-        "confidence": confidence # Tambahan jika Anda ingin menampilkannya di Streamlit
+        "confidence": confidence 
     }

@@ -1,10 +1,20 @@
 import os
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1' 
+
+import torch
+import tensorflow as tf
+
+torch.set_num_threads(1)
+tf.config.threading.set_inter_op_parallelism_threads(1)
+tf.config.threading.set_intra_op_parallelism_threads(1)
+
+import cv2
+cv2.setNumThreads(0) 
 
 import streamlit as st
-import cv2
 import numpy as np
-
 from src.pipeline import recognize_plate
 
 st.set_page_config(
