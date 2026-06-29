@@ -1,3 +1,6 @@
+import os
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+
 import streamlit as st
 import cv2
 import numpy as np
@@ -50,10 +53,8 @@ if uploaded_file:
         with col2:
 
             st.subheader("Recognition Result")
-
-            st.markdown(
-                f"# {result['plate_number']}"
-            )
+            st.markdown(f"# {result['plate_number']}")
+            st.write(f"**Confidence:** {result['confidence']}%") 
 
         st.subheader("Detected Characters")
 

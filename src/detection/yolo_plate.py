@@ -8,9 +8,9 @@ MODEL_PATH = (
     / "plate_detection.pt"
 )
 
-model = YOLO(str(MODEL_PATH))
 
 def crop_plate_yolo(img_input):
+    model = YOLO(str(MODEL_PATH))
     results = model.predict(img_input, verbose=False)
 
     result = results[0]

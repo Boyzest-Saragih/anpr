@@ -1,5 +1,10 @@
-print("START")
+print("1. Memuat OpenCV...")
+import cv2
 
-from src.pipeline import recognize_plate
+print("2. Memuat PyTorch (YOLO)...")
+from ultralytics import YOLO
 
-print("IMPORT BERHASIL")
+print("3. Memuat TensorFlow...")
+import tensorflow as tf
+
+print("SEMUA LIBRARY BERHASIL DIMUAT!")

@@ -11,9 +11,10 @@ MODEL_PATH = (
     / "char_plate.pt"
 )
 
-model = YOLO(str(MODEL_PATH))
 
 def find_char_candidates_yolo(plate_img):
+    model = YOLO(str(MODEL_PATH))
+
     char_candidates = []
 
     if len(plate_img.shape) == 2:
@@ -39,9 +40,11 @@ def find_char_candidates_yolo(plate_img):
 
 
 def extract_characters(plate_bgr):
+    model = YOLO(str(MODEL_PATH))
+
     binary_plate = thresh_plate(plate_bgr)
 
-    results = yolo_char_plate.predict(plate_bgr, verbose=False)
+    results = model.predict(plate_bgr, verbose=False)
     result = results[0]
 
     char_images = []

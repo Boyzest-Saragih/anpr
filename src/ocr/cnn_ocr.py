@@ -10,12 +10,12 @@ MODEL_PATH = (
     / "cnn_model.keras"
 )
 
-model = tf.keras.models.load_model(str(MODEL_PATH))
 
 # mapping kelas angka dan charr
 class_names = [str(i) for i in range(10)] + [chr(i) for i in range(ord('A'), ord('Z')+1)]
 
 def predict_plate_number(list_potongan_karakter):
+    model = tf.keras.models.load_model(str(MODEL_PATH))
     hasil_plat_nomor = ""
     list_confidence = []
 
